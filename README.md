@@ -1,12 +1,22 @@
 # PowerCenter 应用架构
-## 架构解析
+## 架构简介
 - 数据源
 - Domain 域
-- 数据仓库 repository
-- PowerCenter 服务端
-- Informatica 客户端
+  是在 PowerCenter 中进行管理的主单元
+- repository 存储库
+  位于关系数据库中。存储库数据库表包含提取、转换和加载数据所需的指令。
+- 服务端
+- 客户端
+  是一个应用程序，用于定义源和目标、构建具有转换逻辑的映射和 Mapplet，以及创建工作流来运行映射逻辑
 - 目标数据库
-- 管理员页面
+- Informatica Administrator
+  用于管理 Informatica 域和 PowerCenter 安全性的 Web 应用程序。
+- 域配置
+  域配置是一组存储域配置信息的关系数据库表
+- 存储库服务
+  接受 PowerCenter 客户端的创建和修改存储库元数据的请求，并在工作流运行时接受集成服务的元数据请求。
+- 集成服务
+  从源提取数据并将数据加载到目标
 
 从源数据库获取到的源数据，经过PowerCenter Server的处理，将转换的数据给到目标，其中来自元数据的指令将会存储到资料库 repository
 
@@ -17,17 +27,20 @@
   - Repository Service：元数据资料库服务
 2. client 组件
   - Administratortion Console：基于Web的管理控制台
-  - Repository Manager：资料库内容管理客户端工具
-  - Desinger：ETL映射流程设计客户端工具
-  - Workflow Manager：ETL任务执行流程设计客户端工具
-  - Workflow Monitor：ETL任务执行监控客户端工具
+  - Repository Manager：资料库内容管理的客户端工具，可向用户和组分配权限并管理文件夹，查看那存储库对象的对象。
+  - Desinger：ETL映射流程设计的客户端工具
+  - Workflow Manager：ETL任务执行流程设计的客户端工具
+  - Workflow Monitor：ETL任务执行监控的客户端工具，可监视每个集成服务计划运行和正在运行的工作流。
+  - Mapping Architect for Visio：可创建映射模板
 ## 系统管理
 1. Informatica Server管理
   - http://IP-Address:6008
   - Domain 域管理
   - Node 节点管理
-  - Repository Service 资料库管理
+  - Repository Service 存储库管理
+    在存储库数据库表中检索、插入和更新元数据，确保存储库中元数据的一致性。
   - Integration Service 集成服务管理
+    从存储库中读取工作流信息。集成服务通过存储库服务连接到存储库，以便从存储库中提取元数据。
   - WebService Hub 管理
   - License 管理
 2. 资料库内容管理
@@ -82,7 +95,14 @@ Workflow Monitor:6
 4. 定义任务
 5. 创建工作流
 6. 工作流调度监控
+
 ## 组件
+### 组件类型
+- Passive 组件<br>
+流入流出组件的行数不发生变化，例如：Expression组件
+- Active组件<br>
+流入流出组件的行数会发生变化，例如：Aggregator组件
+### 组件列表
 - Source Qualifier: 从数据源读取数据
 - Expression: 行级转换
 - Filter: 数据过滤
@@ -101,3 +121,56 @@ Workflow Monitor:6
 - Custom: 用户自定义组件
 - HTTP: WWW组件
 - Java:Java自编程组件
+### Expression 组件
+- Passive组件类型（对于行数无影响）
+- 基于行级的数据项赋值、修改、计算
+- 在同行记录中可新增、减少数据项
+### Filter组件
+- Active组件类型（行数发生变化）
+- 对流入组件中的记录数据进行过滤
+- 类似于关系型数据库Where应用
+- 与Source Qualify的过滤功能区别在执行位置上
+### Router 组件
+- Active组件类型
+- 对流入组件中的记录数据按照条件进行分发
+- 类似于Java语言中的Switch语句
+### Jonier 组件
+- Active组件类型
+- 对异构数据进行关联（同构关联用Source Qualify组件）
+- 类似于SQL 中的Join语句
+### lookup 组件
+- Active组件类型
+- 对Flat File或数据库根据关联的条件进行查询
+- 返回符合条件的值，否则为空
+- 连接关联与非连接关联
+- 类似于SQL 中的Join语句
+### Aggregator组件
+- Active组件类型
+- 对数据集进行聚合
+- 聚合分有SUM、AVG、Count、Max、Min……
+### Update Strategy组件
+- Active组件类型
+- 对流过组件的每一条记录赋一个操作标志
+- 根据操作标志对目标关系型数据库表生成SQL操作
+- 操作标志有DD_INSERT、DD_DELETE、DD_UPDATE、DD_REJECT
+
+## 函数
+- 聚合函数
+- 字符串函数
+- 转换函数
+- 数据清洗函数
+- 日期函数
+- 编码函数
+- 财务函数
+- 数值函数
+- 数学函数
+- 特有函数
+- 判断函数
+- 用户自定义函数
+## 任务控制
+### 增量抽取实例
+### 参数文件控制
+### 流程控制实例
+### 存储过程实例
+### 行列转换实例
+### 系统性能调优
